@@ -1,0 +1,33 @@
+# Find-S algorithm
+
+import csv
+
+a = [] 
+
+with open('lab1_enjoy_sports.csv') as csfile:
+    reader = csv.reader(csfile)
+    
+    for row in reader:
+        a.append(row)
+        print(row)
+
+num_attributes = len(a[0]) - 1
+print(num_attributes)
+
+print("The most specific hypothesis: ", ["0"]*num_attributes)
+print("The most generic hypothesis: ", ["?"]*num_attributes)
+
+hypothesis = a[1][:-1]
+print(hypothesis)
+
+print("\nFind S: Finding a maximally specific hypothesis")
+for i in range(len(a)):
+    if a[i][num_attributes]  == "Yes":
+        for j in range(num_attributes):
+            if a[i][j] != hypothesis[j]:
+                hypothesis[j] = "?"
+    
+    print("The training example no: ", i+1, "The hypothesis is: ", hypothesis)
+
+print("\nThe maximally specific hypothesis for the training set is:")
+print(hypothesis)

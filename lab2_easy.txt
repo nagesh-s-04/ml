@@ -1,0 +1,46 @@
+# ID3 algorithm
+
+import pandas as pd 
+from pprint import pprint
+from sklearn.feature_selection import mutual_info_classif
+
+def id3(df, target_attribute_name, attribute_names, default_class=None):
+    from collections import Counter     
+    cnt = Counter(x for x in df[target_attribute_name])
+    
+    if len(cnt) == 1:         
+        return next(iter(cnt)) 
+        
+    elif df.empty or (not attribute_names): 
+        return default_class 
+        
+    else:
+        gainz = mutual_info_classif(df[attribute_names],df[target_attribute_name], discrete_features=True)
+        index_of_max = gainz.tolist().index(max(gainz))
+        
+        best_attr = attribute_names[index_of_max] 
+        remaining_attribute_names = [i for i in attribute_names if i != best_attr]
+        
+        tree = {best_attr:{}}
+        for attr_val, data_subset in df.groupby(best_attr): 
+            subtree = id3(data_subset,
+                          target_attribute_name,                         
+                          remaining_attribute_names,                         
+                          default_class)
+            tree[best_attr][attr_val] = subtree 
+        return tree
+
+df_tennis = pd.read_csv(r"lab2_play_tennis.csv")
+
+attribute_names = df_tennis.columns.tolist()
+print("List of Attributes:", attribute_names) 
+
+attribute_names.remove('PlayTennis') 
+print("Predicting Attributes:", attribute_names)
+
+for colname in df_tennis.select_dtypes("object"):
+    df_tennis[colname], _ = df_tennis[colname].factorize()
+
+tree = id3(df_tennis,'PlayTennis',attribute_names)
+print("\nThe Resultant Decision Tree is :") 
+pprint(tree) 
